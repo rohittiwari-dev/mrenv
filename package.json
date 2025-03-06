@@ -1,0 +1,51 @@
+{
+  "name": "superenv",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "superenv": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn ./src/index.ts",
+    "env:generate": "superenv generate"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "env",
+    "environment",
+    "dotenv",
+    "typescript",
+    "typesafe",
+    "nextjs",
+    "vite"
+  ],
+  "author": {
+    "email": "tigertiwari1023@gmail.com",
+    "name": "Rohit Tiwari",
+    "url": "https://github.com/rohittiwari-dev/superenv.git"
+  },
+  "license": "LGPL-3.0-or-later",
+  "description": "",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "chokidar": "^4.0.3",
+    "commander": "^13.1.0",
+    "fs": "^0.0.1-security",
+    "inquirer": "^12.4.2",
+    "path": "^0.12.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
