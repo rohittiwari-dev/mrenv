@@ -16,7 +16,7 @@
       "@/*": ["./src/*"]
     },
     "allowJs": true,
-//    "noEmit":true,
+    "noEmit":true,
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx",

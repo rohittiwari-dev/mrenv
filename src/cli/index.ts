@@ -4,9 +4,9 @@ import path from 'path';
 import {program} from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import {inferType, parseEnvContent} from './utils';
+import {inferType, parseEnvContent} from '@/utils';
 
-import packageJson from '../package.json';
+import packageJson from '../../package.json';
 
 // Detect project type (Next.js, Vite, etc.)
 const detectProjectType = () => {
