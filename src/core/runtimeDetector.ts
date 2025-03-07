@@ -37,46 +37,50 @@ export class RuntimeDetector {
 			return "browser";
 		}
 
-		// Check for Edge runtime (workers)
+		// Check for edge runtimes
 		if (
 			typeof self !== "undefined" &&
-			typeof self.addEventListener !== "undefined" &&
-			typeof document === "undefined"
+			typeof self.addEventListener === "function" &&
+			typeof window === "undefined"
 		) {
 			return "edge";
 		}
 
-		// Default to node as fallback
+		// Default to node if we can't detect
 		return "node";
 	}
 
 	/**
-	 * Checks if the current environment is server-side
-	 * @param runtime Current runtime
+	 * Check if the runtime is server-side
+	 * @param runtime Runtime to check
 	 * @returns True if server-side
 	 */
 	public isServer(runtime: Runtime): boolean {
-		return ["node", "deno", "bun", "edge"].includes(runtime);
+		return (
+			runtime !== "browser" && runtime !== "auto" // Auto isn't a runtime, should never be passed here
+		);
 	}
 
 	/**
-	 * Get the global object for the current runtime
-	 * @param runtime Current runtime
-	 * @returns Global object
+	 * Get the global object for the given runtime
+	 * @param runtime Runtime
+	 * @returns Global object for runtime
 	 */
 	public getGlobalObject(runtime: Runtime): any {
 		switch (runtime) {
 			case "node":
 			case "bun":
-				return global;
-			case "deno":
-				return (globalThis as any).Deno ? globalThis : global;
+				return typeof global !== "undefined" ? global : {};
 			case "browser":
-				return window;
+				return typeof window !== "undefined" ? window : {};
+			case "deno":
+				return typeof Deno !== "undefined"
+					? { process: { env: {} } }
+					: {};
 			case "edge":
-				return self;
+				return typeof self !== "undefined" ? self : {};
 			default:
-				return globalThis;
+				return {};
 		}
 	}
 }

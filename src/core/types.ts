@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Runtime environments where the code can execute
  */
@@ -6,26 +8,32 @@ export type Runtime = "node" | "browser" | "deno" | "edge" | "bun" | "auto";
 /**
  * Environment validation schema type
  */
+export type EnvType = "string" | "number" | "boolean" | "json";
+
+export interface EnvSchemaItem {
+	type: EnvType;
+	required?: boolean;
+	default?: any;
+	validate?: (value: any) => boolean;
+}
+
 export type EnvSchema<T extends Record<string, any>> = {
-	[K in keyof T]: {
-		type: "string" | "number" | "boolean" | "json";
-		default?: T[K];
-		required?: boolean;
-		validate?: (value: T[K]) => boolean;
-	};
+	[K in keyof T]?: EnvSchemaItem;
 };
+
+export type ZodSchema = z.ZodObject<any>;
 
 /**
  * Configuration for createEnv function
  */
 export interface CreateEnvConfig<
-	T extends Record<string, any> = Record<string, any>,
+	T extends Record<string, any> = Record<string, string>,
 > {
 	/**
 	 * Runtime where the code is executing
 	 * @default 'auto'
 	 */
-	runtime?: Runtime;
+	runtime?: Runtime | "auto";
 
 	/**
 	 * List of environment variables that should be protected (server-side only)
@@ -41,7 +49,7 @@ export interface CreateEnvConfig<
 	/**
 	 * Validation schema for environment variables
 	 */
-	schema?: EnvSchema<T>;
+	schema?: EnvSchema<T> | ZodSchema;
 
 	/**
 	 * Custom paths for .env files
@@ -65,14 +73,17 @@ export interface CreateEnvConfig<
 	 * @default './' (root directory)
 	 */
 	outputPath?: string;
+
+	/**
+	 * Exclude patterns for environment variables
+	 */
+	excludePatterns?: string[];
 }
 
 /**
  * Result of createEnv function
  */
-export type EnvResult<T extends Record<string, any>> = {
-	[K in keyof T]: T[K];
-} & {
+export type EnvResult<T extends Record<string, any>> = T & {
 	_metadata: {
 		isClient: boolean;
 		runtime: Runtime;

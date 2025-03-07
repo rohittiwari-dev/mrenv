@@ -75,16 +75,23 @@ export class EnvReader {
 		const env: Record<string, string> = {};
 		const lines = content.split("\n");
 
-		for (const line of lines) {
-			const trimmedLine = line.trim();
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i].trim();
 
 			// Skip empty lines and comments
-			if (!trimmedLine || trimmedLine.startsWith("#")) {
+			if (!line || line.startsWith("#")) {
 				continue;
 			}
 
+			// Handle multiline values using backslash
+			let multilineValue = line;
+			while (multilineValue.endsWith("\\") && i < lines.length - 1) {
+				i++;
+				multilineValue = multilineValue.slice(0, -1) + lines[i].trim();
+			}
+
 			// Find the first = character (ignoring = in quoted values)
-			const keyValueMatch = trimmedLine.match(/^([^=]+)=(.*)$/);
+			const keyValueMatch = multilineValue.match(/^([^=]+)=(.*)$/);
 
 			if (keyValueMatch) {
 				const key = keyValueMatch[1].trim();
@@ -98,8 +105,15 @@ export class EnvReader {
 					value = value.substring(1, value.length - 1);
 				}
 
+				// Handle escape sequences
+				value = value
+					.replace(/\\n/g, "\n")
+					.replace(/\\r/g, "\r")
+					.replace(/\\t/g, "\t");
+
 				// Handle variable expansions ${VAR}
 				value = value.replace(/\${([^}]+)}/g, (match, varName) => {
+					// First check env, then process.env, then return empty string
 					return env[varName] || process.env[varName] || "";
 				});
 

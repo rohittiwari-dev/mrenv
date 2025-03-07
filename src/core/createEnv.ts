@@ -61,55 +61,40 @@ export function createEnv<
 		}, {} as Record<string, string>);
 	}
 
-	// Handle public prefix filtering
-	if (config.publicPrefix) {
-		if (isClient) {
-			// On client, only include variables with public prefix
-			filteredEnv = Object.keys(filteredEnv).reduce((acc, key) => {
-				if (key.startsWith(config.publicPrefix!)) {
-					acc[key] = filteredEnv[key];
-				}
-				return acc;
-			}, {} as Record<string, string>);
-		} else {
-			// Server can access all variables
-		}
+	// If publicPrefix is specified, filter out non-public variables on client
+	if (isClient && config.publicPrefix) {
+		filteredEnv = Object.keys(filteredEnv).reduce((acc, key) => {
+			if (key.startsWith(config.publicPrefix as string)) {
+				acc[key] = filteredEnv[key];
+			}
+			return acc;
+		}, {} as Record<string, string>);
 	}
 
-	let typedEnv: T;
-	let validationErrors: string[] = [];
-
 	// Validate against schema if provided
+	let typedEnv: any = filteredEnv;
+
 	if (config.schema) {
-		const [isValid, errors, validated] = schemaValidator.validate<T>(
+		const [isValid, errors, validatedEnv] = schemaValidator.validate<T>(
 			filteredEnv,
 			config.schema,
 		);
 
-		typedEnv = validated;
-		validationErrors = errors;
+		if (!isValid) {
+			const errorMessage = `Environment validation failed: ${errors.join(
+				", ",
+			)}`;
 
-		// Handle validation errors
-		if (!isValid && validationErrors.length > 0) {
 			if (config.onValidationError) {
-				config.onValidationError(
-					new Error(
-						`Environment validation failed: ${validationErrors.join(
-							", ",
-						)}`,
-					),
-				);
+				const error = new Error(errorMessage);
+				config.onValidationError(error);
 			} else {
-				throw new Error(
-					`Environment validation failed: ${validationErrors.join(
-						", ",
-					)}`,
-				);
+				// Throw error by default unless onValidationError is provided
+				throw new Error(errorMessage);
 			}
 		}
-	} else {
-		// If no schema, just cast the filtered env
-		typedEnv = filteredEnv as unknown as T;
+
+		typedEnv = validatedEnv;
 	}
 
 	// Add metadata
@@ -121,15 +106,6 @@ export function createEnv<
 			loadedFiles,
 		},
 	} as EnvResult<T>;
-
-	// Apply runtime-specific behavior
-	if (runtime === "node" || runtime === "bun") {
-		// For Node.js/Bun, we could optionally override process.env
-	} else if (runtime === "deno") {
-		// For Deno, we might need additional logic
-	} else if (runtime === "browser") {
-		// For browser, maybe store in localStorage or similar
-	}
 
 	return result;
 }

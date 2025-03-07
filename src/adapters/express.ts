@@ -1,10 +1,11 @@
-import { CreateEnvConfig } from "../core/types";
 import { createEnv } from "../core/createEnv";
+import type { Request, Response, NextFunction } from "express";
+import { CreateEnvConfig } from "../core/types";
 
 /**
  * Express middleware options
  */
-export interface SuperenvExpressOptions extends CreateEnvConfig {
+export interface MrenvExpressOptions extends CreateEnvConfig {
 	/**
 	 * Environment variable to expose to frontend
 	 * @default []
@@ -13,37 +14,55 @@ export interface SuperenvExpressOptions extends CreateEnvConfig {
 }
 
 /**
- * Create Express middleware for exposing environment variables
- * @param options Superenv options
+ * Create Express middleware for mrenv
+ * This middleware will:
+ * 1. Make environment variables available in res.locals.env
+ * 2. Optionally expose selected variables to the frontend
+ *
+ * @param options Configuration options
  * @returns Express middleware
  */
-export function superenvExpress(options: SuperenvExpressOptions = {}) {
-	// Initialize environment
-	const env = createEnv({
-		...options,
-		runtime: "node",
-	});
+export function mrenvExpress(options: MrenvExpressOptions = {}) {
+	// Initialize the environment
+	const env = createEnv(options);
 
-	// Filter environment for client exposure
-	const publicEnvKeys = options.exposeKeys || [];
-	const publicEnv = publicEnvKeys.reduce((acc, key) => {
-		if (env[key] !== undefined) {
-			acc[key] = env[key];
+	// Determine which keys to expose
+	const exposeKeys = options.exposeKeys || [];
+
+	// Create a filtered version for frontend exposure
+	const publicEnv: Record<string, any> = {};
+
+	if (exposeKeys.length > 0) {
+		// Only include explicitly listed keys
+		for (const key of exposeKeys) {
+			if (key in env && key !== "_metadata") {
+				publicEnv[key] = env[key];
+			}
 		}
-		return acc;
-	}, {} as Record<string, any>);
-
-	// Create middleware
-	return (req: any, res: any, next: () => void) => {
-		// Make full env available on request object
-		req.env = env;
-
-		// Send public env to client when requested
-		if (req.path === "/_superenv.js") {
-			res.setHeader("Content-Type", "application/javascript");
-			res.send(`window.env = ${JSON.stringify(publicEnv)};`);
-			return;
+	} else if (options.publicPrefix) {
+		// Include all keys with public prefix
+		for (const [key, value] of Object.entries(env)) {
+			if (key !== "_metadata" && key.startsWith(options.publicPrefix)) {
+				publicEnv[key] = value;
+			}
 		}
+	}
+
+	// Return the middleware
+	return (req: Request, res: Response, next: NextFunction) => {
+		// Make full env available to server code via res.locals
+		res.locals.env = env;
+
+		// Make public env available for templates
+		res.locals.publicEnv = publicEnv;
+
+		// Add helper to expose env to frontend
+		res.locals.getEnvScript = () => {
+			const script = `<script>window.ENV = ${JSON.stringify(
+				publicEnv,
+			)};</script>`;
+			return script;
+		};
 
 		next();
 	};

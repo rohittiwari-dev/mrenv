@@ -1,132 +1,132 @@
-# Contributing to MrEnv
+# Contributing to mrenv
 
-Thank you for considering contributing to MrEnv! We welcome contributions from everyone, whether it's fixing a typo in documentation or implementing a new feature.
+First off, thank you for considering contributing to mrenv! It's people like you that make the open source community such a great place to learn, inspire, and create. Here are the guidelines we'd like you to follow:
+
+-   [Code of Conduct](#code-of-conduct)
+-   [Question or Problem?](#question-or-problem)
+-   [Issues and Bugs](#issues-and-bugs)
+-   [Feature Requests](#feature-requests)
+-   [Submission Guidelines](#submission-guidelines)
+-   [Development Setup](#development-setup)
+-   [Coding Rules](#coding-rules)
+-   [Commit Message Guidelines](#commit-message-guidelines)
 
 ## Code of Conduct
 
-By participating in this project, you are expected to uphold our Code of Conduct, which asks you to be respectful and considerate of others.
+This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-## Getting Started
+## Question or Problem?
 
-1. Fork the repository
-2. Clone your fork locally
-3. Create a new branch for your changes
-4. Make your changes
-5. Run tests and linting
-6. Commit and push your changes
-7. Submit a pull request
+If you have questions about how to use mrenv, please start a new discussion in the GitHub Discussions tab rather than opening an issue.
+
+## Issues and Bugs
+
+If you find a bug in the source code, you can help us by [submitting an issue](#submission-guidelines) to our GitHub Repository. Even better, you can [submit a Pull Request](#pull-requests) with a fix.
+
+## Feature Requests
+
+You can request a new feature by [submitting an issue](#submission-guidelines) to our GitHub Repository. If you would like to implement a new feature, please submit an issue with a proposal for your work first, to be sure that we can use it.
+
+## Submission Guidelines
+
+### Submitting an Issue
+
+Before you submit an issue, please search the issue tracker, maybe an issue for your problem already exists and the discussion might inform you of workarounds readily available.
+
+We want to fix all the issues as soon as possible, but before fixing a bug we need to reproduce and confirm it. In order to reproduce bugs, we will systematically ask you to provide minimal reproduction scenarios. Having a live, reproducible scenario gives us a wealth of important information without going back and forth with you.
+
+### Submitting a Pull Request (PR)
+
+Before you submit your Pull Request (PR) consider the following guidelines:
+
+1. Search GitHub for an open or closed PR that relates to your submission. You don't want to duplicate effort.
+
+2. Fork the repository.
+
+3. Make your changes in a new git branch:
+
+    ```bash
+    git checkout -b my-fix-branch main
+    ```
+
+4. Create your changes, including appropriate test cases.
+
+5. Run the test suite, as described in the [Development Setup](#development-setup) section.
+
+6. Commit your changes using a descriptive commit message that follows our [commit message conventions](#commit-message-guidelines).
+
+7. Push your branch to GitHub:
+
+    ```bash
+    git push origin my-fix-branch
+    ```
+
+8. In GitHub, send a pull request to `main`.
 
 ## Development Setup
 
-```bash
-# Install dependencies
-npm install
+1. Clone the repository:
 
-# Build the project
-npm run build
+    ```bash
+    git clone https://github.com/your-username/mrenv.git
+    cd mrenv
+    ```
 
-# Watch mode for development
-npm run dev
+2. Install dependencies:
 
-# Run linting
-npm run lint
-```
+    ```bash
+    npm install
+    ```
 
-## Project Structure
+3. Build the project:
 
--   `src/core/` - Core functionality
--   `src/adapters/` - Framework adapters
--   `src/cli/` - CLI commands
--   `bin/` - Executable scripts
+    ```bash
+    npm run build
+    ```
 
-## Pull Request Process
+4. Test your changes locally:
 
-1. Update the README.md with details of changes to the API, if applicable
-2. Update the documentation with details of features added or changed
-3. The versioning scheme we use is [SemVer](http://semver.org/)
-4. Your PR should be reviewed by at least one maintainer
+    ```bash
+    npm run dev
+    ```
 
-## Coding Guidelines
+## Coding Rules
 
--   Write tests for new features
--   Follow the existing code style
--   Document new functions, methods, and classes
--   Keep your changes focused and specific
--   Be considerate of performance implications
--   Provide meaningful commit messages
+To ensure consistency throughout the source code, keep these rules in mind as you are working:
 
-## Testing
+-   All features or bug fixes **must be tested** by one or more specs (unit-tests).
+-   All public API methods **must be documented**.
+-   We follow [Prettier](https://prettier.io/) for code formatting and use ESLint for linting.
 
-Before submitting your changes, make sure to test them thoroughly. This includes:
+## Commit Message Guidelines
 
--   Manual testing of your new features
--   Running existing tests
--   Adding new tests for your features if applicable
+We have very precise rules over how our git commit messages can be formatted. This leads to **more readable messages** that are easy to follow when looking through the project history.
 
-## Documentation
+### Commit Message Format
 
-If you're adding or changing features, make sure to update the documentation, including:
-
--   README.md
--   Code comments
--   TSDoc comments for public APIs
-
-## Releasing
-
-For maintainers only:
-
-1. Update the version in package.json
-2. Run `npm run build`
-3. Create a new GitHub release
-4. Publish to npm with `npm publish`
-
-## Additional Notes
-
-### Commit Messages
-
-We recommend following the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages.
-
-### Branch Strategy
-
--   `main` - Latest stable release
--   `develop` - Development branch
--   Feature branches should be created from `develop` and named descriptively
-
-## Project Structure
+Each commit message consists of a **header**, a **body** and a **footer**. The header has a special format that includes a **type**, a **scope** and a **subject**:
 
 ```
-mrenv/
-├── src/
-│   ├── core/
-│   │   ├── createEnv.ts         # Main API function
-│   │   ├── envReader.ts         # Environment file reader
-│   │   ├── runtimeDetector.ts   # Detects Node.js, Deno, browser, etc.
-│   │   ├── schema.ts            # Schema validation functions
-│   │   └── types.ts             # Core type definitions
-│   ├── adapters/
-│   │   ├── next.ts              # Next.js adapter
-│   │   ├── vite.ts              # Vite plugin
-│   │   ├── express.ts           # Express.js adapter
-│   │   ├── remix.ts             # Remix adapter
-│   │   ├── deno.ts              # Deno adapter
-│   │   └── edge.ts              # Edge runtime adapter
-│   ├── cli/
-│   │   ├── index.ts             # CLI entry point
-│   │   ├── commands/
-│   │   │   ├── generate.ts      # Generate typings command
-│   │   └── utils/
-│   │       └── fileGenerator.ts # Utilities for generating files
-│   └── index.ts                 # Package entry point
-├── bin/
-│   └── mrenv.js                 # CLI binary
-├── tsconfig.json                # TypeScript configuration
-├── package.json                 # Package manifest
-├── SECURITY.md                  # Security documentation
-├── CONTRIBUTING.md              # Contribution guidelines
-├── README.md                    # Package documentation
-└── tsup.config.ts               # Build configuration
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
 ```
 
-## Closing notes
+The **header** is mandatory and the **scope** of the header is optional.
 
-Again, thank you so much for your interest in contributing to MrEnv, we really appreciate it, and if there is anything we can do to help your journey, make sure to join our Community.
+### Type
+
+Must be one of the following:
+
+-   **feat**: A new feature
+-   **fix**: A bug fix
+-   **docs**: Documentation only changes
+-   **style**: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+-   **refactor**: A code change that neither fixes a bug nor adds a feature
+-   **perf**: A code change that improves performance
+-   **test**: Adding missing tests or correcting existing tests
+-   **chore**: Changes to the build process or auxiliary tools
+
+Thank you for contributing!

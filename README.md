@@ -1,83 +1,115 @@
-# Mr. env
+# mrenv
 
-Advanced environment variable manager with type safety, validation, and runtime security features.
+A type-safe environment variable manager with runtime detection and automatic type generation.
 
 ## Features
 
--   🔒 **Security**: Separate client and server environment variables
--   📘 **Type Safety**: Automatic TypeScript type generation
--   ✅ **Validation**: Schema-based validation with custom error handling
--   🔍 **Pattern Support**: Read from multiple `.env.*` files with custom patterns
--   🚀 **Framework Adapters**: Integrate with Next.js, Vite, Express, Remix, and more
--   🤖 **CLI Tools**: Generate type definitions and environment files
--   🔄 **Auto Reload**: Automatically reload variables on file changes
--   🌐 **Runtime Detection**: Works across Node.js, browsers, Deno, Bun, and Edge runtimes
+-   🔒 Type-safe environment variables
+-   🔍 Runtime detection (Node.js, Browser, Deno, Edge, Bun)
+-   📝 Automatic type generation
+-   🛡️ Client/server side security
+-   🔄 Auto-reload on file changes
+-   🔌 Adapters for Next.js, Vite, Express and more
+-   ✅ Validation with schema support
+-   🛠️ CLI for type generation
 
 ## Installation
 
 ```bash
 npm install mrenv
-# or
-yarn add mrenv
-# or
-pnpm add mrenv
 ```
 
-## Quick Start
-
-### Basic Usage
+## Basic Usage
 
 Create a `.env` file in your project root:
 
 ```
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=admin
-DB_PASS=secret
+DB_USER=postgres
 PUBLIC_API_URL=https://api.example.com
 ```
 
-Then in your code:
+Then use it in your code:
 
 ```typescript
+// env.ts
 import { createEnv } from "mrenv";
 
-// Basic usage - automatically reads .env files
-const env = createEnv();
+export const env = createEnv({
+	// Specify which variables are protected (server-side only)
+	protectedEnv: ["DB_HOST", "DB_PORT", "DB_USER"],
 
-// Access environment variables
-console.log(env.DB_HOST); // "localhost"
-console.log(env.DB_PORT); // "5432"
+	// Specify prefix for public variables
+	publicPrefix: "PUBLIC_",
+});
+
+// Your environment variables are now type-safe!
+console.log(env.DB_HOST); // localhost
+console.log(env.PUBLIC_API_URL); // https://api.example.com
 ```
 
-### With Schema Validation
+## Schema Validation
+
+You can add validation using a schema in two ways:
+
+### 1. Using Built-in Schema
 
 ```typescript
 import { createEnv } from "mrenv";
 
-// Define a schema for validation
-const env = createEnv({
+export const env = createEnv({
 	schema: {
-		DB_HOST: { type: "string", required: true },
-		DB_PORT: { type: "number", required: true },
-		DB_USER: { type: "string", required: true },
-		DB_PASS: { type: "string", required: true },
+		DB_PORT: {
+			type: "number",
+			required: true,
+		},
+		DEBUG: {
+			type: "boolean",
+			default: false,
+		},
 		NODE_ENV: {
 			type: "string",
-			default: "development",
 			validate: (value) =>
 				["development", "production", "test"].includes(value),
 		},
 	},
-	onValidationError: (error) => {
-		console.error("Environment validation failed:", error.message);
-		process.exit(1);
-	},
+});
+```
+
+### 2. Using Zod Schema (Recommended)
+
+```typescript
+import { createEnv } from "mrenv";
+import { z } from "zod";
+
+// Define your schema with Zod for powerful validations
+const schema = z.object({
+	PORT: z.preprocess((val) => Number(val), z.number().min(1000).max(9999)),
+	NODE_ENV: z
+		.enum(["development", "production", "test"])
+		.default("development"),
+	DATABASE_URL: z.string().url(),
+	DEBUG: z
+		.preprocess((val) => val === "true" || val === "1", z.boolean())
+		.default(false),
+	// Complex transformations and validations
+	API_CONFIG: z.preprocess(
+		(val) => (typeof val === "string" ? JSON.parse(val) : val),
+		z.object({
+			baseUrl: z.string().url(),
+			timeout: z.number().positive(),
+		}),
+	),
 });
 
-// TypeScript will infer all the correct types
-const port = env.DB_PORT; // number
-const host = env.DB_HOST; // string
+// Use the Zod schema with mrenv
+export const env = createEnv({ schema });
+
+// TypeScript types are automatically inferred from your Zod schema!
+console.log(env.PORT); // number
+console.log(env.DATABASE_URL); // string
+console.log(env.API_CONFIG.baseUrl); // string
 ```
 
 ### Client/Server Security
@@ -249,6 +281,57 @@ Mrenv automatically detects the runtime environment and adapts its behavior:
 -   **Deno**: Uses Deno.env and .env files
 -   **Bun**: Supports Bun.env and .env files
 -   **Edge**: Compatible with edge runtime environments
+
+## Error Handling
+
+By default, `mrenv` will throw errors when validation fails, allowing you to catch issues early:
+
+```typescript
+try {
+	const env = createEnv({
+		schema: {
+			PORT: { type: "number", required: true },
+		},
+	});
+} catch (error) {
+	console.error("Environment validation failed:", error.message);
+	process.exit(1);
+}
+```
+
+You can also provide a custom error handler:
+
+```typescript
+const env = createEnv({
+	schema: {
+		PORT: { type: "number", required: true },
+	},
+	onValidationError: (error) => {
+		// Log to a monitoring service
+		sendToMonitoring(error);
+
+		// Exit with error code
+		process.exit(1);
+	},
+});
+```
+
+With Zod schemas, you get detailed error messages about validation failures:
+
+```typescript
+try {
+	const env = createEnv({
+		schema: z.object({
+			PORT: z.number().min(1000).max(9999),
+			DATABASE_URL: z.string().url(),
+		}),
+	});
+} catch (error) {
+	// Error will contain detailed information about validation failures
+	console.error("Validation error:", error.message);
+	// Example: "Validation failed: PORT: Expected number, received string, DATABASE_URL: Invalid url"
+}
+```
 
 ## License
 
