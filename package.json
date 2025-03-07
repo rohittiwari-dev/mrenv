@@ -1,67 +1,69 @@
 {
-  "name": "greatenv",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "scripts": {
-    "build": "tsup"
-  },
-  "files": [
-    "dist",
-    "package.json"
-  ],
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    }
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "env",
-    "environment",
-    "dotenv",
-    "typescript",
-    "typesafe",
-    "nextjs",
-    "vite"
-  ],
-  "author": {
-    "email": "tigertiwari1023@gmail.com",
-    "name": "Rohit Tiwari",
-    "url": "https://github.com/rohittiwari-dev/great-env.git"
-  },
-  "license": "AGPL-3.0-or-later",
-  "description": "",
-  "dependencies": {},
-  "devDependencies": {
-    "chokidar": "^4.0.3",
-    "fs": "^0.0.1-security",
-    "path": "^0.12.7",
-    "typescript": "^5.8.2",
-    "@types/node": "^22.13.9",
-    "chalk": "^5.4.1",
-    "commander": "^13.1.0",
-    "inquirer": "^12.4.2",
-    "tsup": "^8.4.0",
-    "zod": "^3.24.2"
-  },
-  "peerDependencies": {
-    "zod": ">=3.24.1"
-  },
-  "packageManager": "bun@1.2.4",
-  "engines": {
-    "node": ">=16"
-  }
+	"name": "mrenv",
+	"version": "1.0.0-beta-1",
+	"description": "Advanced environment variables management with type safety and runtime detection",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"module": "dist/index.mjs",
+	"bin": {
+		"mrenv": "./bun/mrenv.js"
+	},
+	"files": [
+		"dist"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"keywords": [
+		"env",
+		"environment",
+		"variables",
+		"dotenv",
+		"typescript",
+		"types",
+		"schema",
+		"validation",
+		"nextjs",
+		"vite",
+		"express",
+		"deno",
+		"remix"
+	],
+	"author": {
+		"email": "tigertiwari1023@gmail.com",
+		"name": "Rohit Tiwari",
+		"url": "https://github.com/rohittiwari-dev"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/rohittiwari-dev/mrenv.git"
+	},
+	"license": "AGPL-3.0-or-later",
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"lint": "eslint . --ext .ts",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"prepublishOnly": "npm run build"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/next": "^8.0.7",
+		"@types/node": "^20.11.0",
+		"typescript": "^5.3.3",
+		"vite": "^6.2.1"
+	},
+	"dependencies": {
+		"@types/node": "^22.13.9",
+		"chalk": "^5.4.1",
+		"chokidar": "^4.0.3",
+		"commander": "^11.1.0",
+		"inquirer": "^12.4.2",
+		"tsup": "^8.4.0",
+		"typescript": "^5.8.2",
+		"zod": "^3.24.2"
+	},
+	"engines": {
+		"node": ">=14.16"
+	}
 }

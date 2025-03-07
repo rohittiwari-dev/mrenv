@@ -1,192 +1,255 @@
-# greatenv
-THIS IS A WARNING DO NOT USE THIS PACKAGE IN PRODUCTION FOR NOW 
+# Mr. env
 
-- for contribution read contribution guide
+Advanced environment variable manager with type safety, validation, and runtime security features.
 
-greatenv is an advanced environment variable management package for JavaScript/TypeScript applications that provides:
+## Features
 
-- Type-safe environment variables
-- Automatic type inference
-- Runtime protection for server/client access
-- Schema validation
-- Auto-reloading on environment file changes
-- Framework adapters (Next.js, Vite, etc.)
+-   🔒 **Security**: Separate client and server environment variables
+-   📘 **Type Safety**: Automatic TypeScript type generation
+-   ✅ **Validation**: Schema-based validation with custom error handling
+-   🔍 **Pattern Support**: Read from multiple `.env.*` files with custom patterns
+-   🚀 **Framework Adapters**: Integrate with Next.js, Vite, Express, Remix, and more
+-   🤖 **CLI Tools**: Generate type definitions and environment files
+-   🔄 **Auto Reload**: Automatically reload variables on file changes
+-   🌐 **Runtime Detection**: Works across Node.js, browsers, Deno, Bun, and Edge runtimes
 
 ## Installation
 
 ```bash
-npm install greatenv
+npm install mrenv
 # or
-yarn add greatenv
+yarn add mrenv
 # or
-pnpm add greatenv
+pnpm add mrenv
 ```
 
-## Basic Usage
+## Quick Start
 
-```typescript
-// env.ts
-import { createEnv, z } from 'greatenv';
+### Basic Usage
 
-// Define your schema (optional)
-const schema = z.object({
-  API_URL: z.string().url(),
-  PORT: z.string().transform(Number).pipe(z.number().positive()),
-  DEBUG: z.enum(['true', 'false']).transform(val => val === 'true'),
-});
+Create a `.env` file in your project root:
 
-// Create your environment with automatic types
-export const env = createEnv({
-  schema,
-  publicPrefix: 'PUBLIC_', // Variables prefixed with PUBLIC_ will be accessible on client
-  protectedEnv: true, // Other variables will be server-only
-});
-
-// Type-safe usage
-const port = env.PORT; // number
-const apiUrl = env.API_URL; // string
-const debug = env.DEBUG; // boolean
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=admin
+DB_PASS=secret
+PUBLIC_API_URL=https://api.example.com
 ```
 
-## Configuration Options
-
-The `createEnv` function accepts the following configuration options:
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `runtime` | `'node'` \| `'browser'` \| `'auto'` | `'auto'` | Specify the runtime environment |
-| `protectedEnv` | `boolean` | `false` | Make all variables server-only by default |
-| `publicPrefix` | `string` | `undefined` | Prefix for client-accessible variables |
-| `schema` | `ZodSchema` | `undefined` | Zod schema for validation |
-| `paths` | `string[]` | `.env.*` | Custom paths to env files |
-| `exclude` | `RegExp[]` | `[]` | Patterns to exclude from loading |
-| `onValidationError` | `(error: ZodError) => void` | `undefined` | Custom error handler |
-| `watch` | `boolean` | `false` | Watch for file changes and reload |
-
-## Advanced Features
-
-### Automatic Type Inference
-
-greatenv can automatically infer types from environment variable values:
+Then in your code:
 
 ```typescript
-// Example .env file
-PORT=3000
-DEBUG=true
-API_URL=https://api.example.com
-MAX_RETRIES=5
+import { createEnv } from "mrenv";
 
-// Types will be inferred as:
-// PORT: number
-// DEBUG: boolean
-// API_URL: string
-// MAX_RETRIES: number
+// Basic usage - automatically reads .env files
+const env = createEnv();
+
+// Access environment variables
+console.log(env.DB_HOST); // "localhost"
+console.log(env.DB_PORT); // "5432"
+```
+
+### With Schema Validation
+
+```typescript
+import { createEnv } from "mrenv";
+
+// Define a schema for validation
+const env = createEnv({
+	schema: {
+		DB_HOST: { type: "string", required: true },
+		DB_PORT: { type: "number", required: true },
+		DB_USER: { type: "string", required: true },
+		DB_PASS: { type: "string", required: true },
+		NODE_ENV: {
+			type: "string",
+			default: "development",
+			validate: (value) =>
+				["development", "production", "test"].includes(value),
+		},
+	},
+	onValidationError: (error) => {
+		console.error("Environment validation failed:", error.message);
+		process.exit(1);
+	},
+});
+
+// TypeScript will infer all the correct types
+const port = env.DB_PORT; // number
+const host = env.DB_HOST; // string
 ```
 
 ### Client/Server Security
 
-greatenv can protect server-only variables from being accessed on the client:
-
 ```typescript
-// Setup
+import { createEnv } from "mrenv";
+
+// Define which variables should be protected (server-side only)
 const env = createEnv({
-  publicPrefix: 'PUBLIC_',
-  protectedEnv: true,
+	protectedEnv: ["DB_HOST", "DB_USER", "DB_PASS", "API_SECRET"],
+	publicPrefix: "PUBLIC_", // Variables with this prefix are accessible on client
 });
 
-// .env file
-DATABASE_URL=postgres://user:password@localhost:5432/db
-PUBLIC_API_URL=https://api.example.com
+// These variables are only available on the server
+console.log(env.DB_HOST);
+console.log(env.API_SECRET);
 
-// Usage
-// On server:
-env.DATABASE_URL; // Works fine
-env.PUBLIC_API_URL; // Works fine
-
-// On client:
-env.DATABASE_URL; // Throws error: Cannot access server-side variable
-env.PUBLIC_API_URL; // Works fine
+// These variables with the prefix are available everywhere
+console.log(env.PUBLIC_API_URL);
 ```
 
-### Framework Adapters
+## CLI Usage
 
-#### Next.js Integration
+Mrenv includes a CLI to generate type definitions for your environment variables.
+
+Add a script to your package.json:
+
+```json
+{
+	"scripts": {
+		"generate-env": "mrenv generate"
+	}
+}
+```
+
+Then run:
+
+```bash
+npm run generate-env
+```
+
+This will:
+
+1. Scan your .env files
+2. Generate a `env.d.ts` file with TypeScript definitions
+3. Create an `env.ts` module with validation logic
+
+Options:
+
+```bash
+mrenv generate --output-path ./src/config --schema-path ./src/schema.ts
+```
+
+## Framework Integration
+
+### Next.js
 
 ```typescript
 // next.config.js
-const { withgreatenv } = require('greatenv');
+const { withMrenv } = require("mrenv/dist/adapters/next");
 
-module.exports = withgreatenv({
-  publicPrefix: 'PUBLIC_',
-  protectedEnv: true,
-})({
-  // Your Next.js configuration
-});
+module.exports = withMrenv(
+	{
+		// Your Next.js config
+	},
+	{
+		publicPrefix: "PUBLIC_",
+		protectedEnv: ["API_SECRET", "DB_PASSWORD"],
+	},
+);
 ```
 
-#### Vite Integration
+### Vite
 
 ```typescript
-// vite.config.js/ts
-import { defineConfig } from 'vite';
-import { vitegreatenv } from 'greatenv';
+// vite.config.ts
+import { defineConfig } from "vite";
+import { mrenvVite } from "mrenv/adapters/vite";
 
 export default defineConfig({
-  plugins: [
-    vitegreatenv({
-      publicPrefix: 'PUBLIC_',
-    }),
-  ],
+	plugins: [
+		mrenvVite({
+			publicPrefix: "PUBLIC_",
+		}),
+	],
 });
 ```
 
-### Schema Validation with Custom Error Handling
+### Express
 
 ```typescript
-import { createEnv, z } from 'greatenv';
+import express from "express";
+import { mrenvExpress } from "mrenv/adapters/express";
 
-const env = createEnv({
-  schema: z.object({
-    PORT: z.string().transform(Number).pipe(z.number().min(1024).max(65535)),
-    NODE_ENV: z.enum(['development', 'production', 'test']),
-  }),
-  onValidationError: (error) => {
-    console.error('Environment validation failed:');
-    console.error(error.format());
-    process.exit(1); // Exit if validation fails
-  },
+const app = express();
+
+// Use the middleware
+app.use(
+	mrenvExpress({
+		exposeKeys: ["PUBLIC_API_URL", "PUBLIC_VERSION"],
+	}),
+);
+
+app.get("/", (req, res) => {
+	// Access env in request
+	console.log(req.env.DB_HOST);
+
+	res.send(`
+    <html>
+      <head>
+        <script src="/_mrenv.js"></script>
+        <script>
+          console.log(window.env.PUBLIC_API_URL);
+        </script>
+      </head>
+      <body>Hello World</body>
+    </html>
+  `);
 });
 ```
 
-### File Watching and Auto-Reloading
+## Advanced Configuration
 
 ```typescript
+import { createEnv } from "mrenv";
+
 const env = createEnv({
-  watch: true, // Automatically reload when env files change
+	// Specify runtime (auto-detected by default)
+	runtime: "node", // 'node', 'browser', 'deno', 'edge', 'bun', 'auto'
+
+	// Protected environment variables (server-side only)
+	protectedEnv: ["API_SECRET", "DB_PASSWORD"],
+
+	// Prefix for client-accessible variables
+	publicPrefix: "PUBLIC_",
+
+	// Validation schema
+	schema: {
+		API_URL: { type: "string", required: true },
+		API_SECRET: { type: "string", required: true },
+		DB_PORT: { type: "number", default: 5432 },
+		FEATURE_FLAGS: { type: "json", default: "{}" },
+		DEBUG: { type: "boolean", default: false },
+	},
+
+	// Custom paths for .env files
+	paths: [".env.local", ".env"],
+
+	// Error handling
+	onValidationError: (error) => {
+		console.error("Environment validation failed:", error.message);
+		process.exit(1);
+	},
+
+	// Auto reload on file changes
+	autoReload: true,
+
+	// Output path for generated files
+	outputPath: "./src/config",
 });
 ```
 
-### Custom Env File Paths
+## Runtime Support
 
-```typescript
-const env = createEnv({
-  paths: [
-    '.env',
-    '.env.local',
-    '.env.custom',
-    'config/secrets.env',
-  ],
-  exclude: [
-    /\.test$/,
-    /\.example$/,
-  ],
-});
-```
+Mrenv automatically detects the runtime environment and adapts its behavior:
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+-   **Node.js**: Reads from process.env and .env files
+-   **Browser**: Reads from window.env
+-   **Deno**: Uses Deno.env and .env files
+-   **Bun**: Supports Bun.env and .env files
+-   **Edge**: Compatible with edge runtime environments
 
 ## License
 
-AGPL Version 3
+AGPL-3.0-or-later
