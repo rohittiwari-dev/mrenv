@@ -1,9 +1,9 @@
-# SuperEnv
+# greatenv
 THIS IS A WARNING DO NOT USE THIS PACKAGE IN PRODUCTION FOR NOW 
 
 - for contribution read contribution guide
 
-SuperEnv is an advanced environment variable management package for JavaScript/TypeScript applications that provides:
+greatenv is an advanced environment variable management package for JavaScript/TypeScript applications that provides:
 
 - Type-safe environment variables
 - Automatic type inference
@@ -15,18 +15,18 @@ SuperEnv is an advanced environment variable management package for JavaScript/T
 ## Installation
 
 ```bash
-npm install superenv
+npm install greatenv
 # or
-yarn add superenv
+yarn add greatenv
 # or
-pnpm add superenv
+pnpm add greatenv
 ```
 
 ## Basic Usage
 
 ```typescript
 // env.ts
-import { createEnv, z } from 'superenv';
+import { createEnv, z } from 'greatenv';
 
 // Define your schema (optional)
 const schema = z.object({
@@ -67,7 +67,7 @@ The `createEnv` function accepts the following configuration options:
 
 ### Automatic Type Inference
 
-SuperEnv can automatically infer types from environment variable values:
+greatenv can automatically infer types from environment variable values:
 
 ```typescript
 // Example .env file
@@ -85,7 +85,7 @@ MAX_RETRIES=5
 
 ### Client/Server Security
 
-SuperEnv can protect server-only variables from being accessed on the client:
+greatenv can protect server-only variables from being accessed on the client:
 
 ```typescript
 // Setup
@@ -114,9 +114,9 @@ env.PUBLIC_API_URL; // Works fine
 
 ```typescript
 // next.config.js
-const { withSuperEnv } = require('superenv');
+const { withgreatenv } = require('greatenv');
 
-module.exports = withSuperEnv({
+module.exports = withgreatenv({
   publicPrefix: 'PUBLIC_',
   protectedEnv: true,
 })({
@@ -129,11 +129,11 @@ module.exports = withSuperEnv({
 ```typescript
 // vite.config.js/ts
 import { defineConfig } from 'vite';
-import { viteSuperEnv } from 'superenv';
+import { vitegreatenv } from 'greatenv';
 
 export default defineConfig({
   plugins: [
-    viteSuperEnv({
+    vitegreatenv({
       publicPrefix: 'PUBLIC_',
     }),
   ],
@@ -143,7 +143,7 @@ export default defineConfig({
 ### Schema Validation with Custom Error Handling
 
 ```typescript
-import { createEnv, z } from 'superenv';
+import { createEnv, z } from 'greatenv';
 
 const env = createEnv({
   schema: z.object({

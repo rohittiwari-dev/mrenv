@@ -1,4 +1,4 @@
-# Superenv's's contributing guidelines
+# greatenv's's contributing guidelines
 
 Thank you for your interest in contributing to our project! Any contribution is highly appreciated and will be reflected on our project ✨
 
@@ -8,7 +8,7 @@ In this guide, you will get an overview of the project structure and setup, as w
 
 ## Table of contents
 
-- [Superenv's's contributing guidelines](#notespaces-contributing-guidelines)
+- [greatenv's's contributing guidelines](#notespaces-contributing-guidelines)
     - [Table of contents](#table-of-contents)
     - [New contributor guide](#new-contributor-guide)
     - [Getting your foot in](#getting-your-foot-in)
@@ -33,24 +33,24 @@ Here are some resources to help you get started with open source contributions:
 
 ## Getting your foot in
 
-Our preferred way of providing the opportunity for people to contribute to Superenv's is through a process that starts with creating a new issue, the summary of the workflow that you can expect and should adhere to is the following:
+Our preferred way of providing the opportunity for people to contribute to greatenv's is through a process that starts with creating a new issue, the summary of the workflow that you can expect and should adhere to is the following:
 
 - You see an area of improvement in the code base, this could be a fix, feature, refactoring...etc
 - Create an [issue](https://github.com/noodle-run/noodle/issues) on our Github repository.
 - Wait until a team member discusses the issue with you, and if both parties are in agreement, you can start working on the issue.
 - Once work has started, you can create a draft pull request and remember to link your pull request with the issue.
 - Once the work is complete, change the status of the pull request to ready for review.
-- We will review the pull request and if all is good, congratulations! 🥳 you are now a Superenv's contributor!
+- We will review the pull request and if all is good, congratulations! 🥳 you are now a greatenv's contributor!
 - If not, we will explain the changes that need to be made for the pull request to be merged or why it can't be merged.
 
-If you would like to be more involved in the development of Superenv's, we would like to invite you to our [Discord Server](https://discord.gg/SERySfj8Eg) where we can have a chat together and get you involved in the project!
+If you would like to be more involved in the development of greatenv's, we would like to invite you to our [Discord Server](https://discord.gg/SERySfj8Eg) where we can have a chat together and get you involved in the project!
 
 ### Some simple rules
 
 - Don't work on an issue that is already being worked on by someone else.
 - Don't work on something without getting a team member's approval, this is to not waste your time by making you work on something that won't be merged.
 - Don't demand for your pull request to be approved and merged.
-- Be nice to everyone involved, we are aiming to create a positive community around collaborating and contributing towards Superenv's's development.
+- Be nice to everyone involved, we are aiming to create a positive community around collaborating and contributing towards greatenv's's development.
 
 ## The tech stack
 
@@ -89,7 +89,7 @@ git clone https://github.com/<your-gh-username>/noodle.git
 
 ### Bun
 
-Bun is used as the package manager of Superenv's, with Bun, you don't need to have NodeJS installed at all on your system to be able to run Superenv's. The only tool you need to install dependencies & run Superenv's is Bun!
+Bun is used as the package manager of greatenv's, with Bun, you don't need to have NodeJS installed at all on your system to be able to run greatenv's. The only tool you need to install dependencies & run greatenv's is Bun!
 
 To install bun, head over to [their website](https://bun.sh/) which will tell you how to get it installed on your system.
 
@@ -103,7 +103,7 @@ If this commands outputs a version number, you're all good to go.
 
 ### Installing dependencies
 
-With bun installed on your machine, the next step would be to install the dependencies that Superenv's relies upon to work, to do this, run the following command:
+With bun installed on your machine, the next step would be to install the dependencies that greatenv's relies upon to work, to do this, run the following command:
 
 ```bash
 bun install
@@ -142,4 +142,4 @@ bun format
 
 ## Closing notes
 
-Again, thank you so much for your interest in contributing to Superenv's, we really appreciate it, and if there is anything we can do to help your journey, make sure to join our [Discord Server](https://discord.gg/SERySfj8Eg).
+Again, thank you so much for your interest in contributing to greatenv's, we really appreciate it, and if there is anything we can do to help your journey, make sure to join our [Discord Server](https://discord.gg/SERySfj8Eg).

@@ -1,4 +1,4 @@
-# Superenv Security
+# greatenv Security
 
 ## Reporting a Vulnerability
 
