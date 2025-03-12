@@ -2,7 +2,7 @@
  * Type Definitions
  */
 
-import { z, ZodType, type ZodTypeDef, ZodError } from "zod";
+import { ZodType, ZodError } from "zod";
 import { type EnvironmentAdapter } from "./adapters";
 
 /**
@@ -183,9 +183,9 @@ export type EnvSafeResult<T extends EnvSafeSchema> = {
  * Create a more specific type helper for better IntelliSense
  */
 export type TypedEnv<
-	TServer extends Record<string, ZodType> = {},
-	TClient extends Record<string, ZodType> = {},
-	TShared extends Record<string, ZodType> = {},
+	TServer extends Record<string, ZodType> = Record<string, never>,
+	TClient extends Record<string, ZodType> = Record<string, never>,
+	TShared extends Record<string, ZodType> = Record<string, never>,
 > = EnvSafeResult<{
 	server: TServer;
 	client: TClient;

@@ -7,7 +7,6 @@
 import fs from "fs";
 import path from "path";
 import { z, ZodType } from "zod";
-import { parse } from "./parser";
 import { EnvSafeError } from "./errors";
 
 /**
@@ -143,7 +142,6 @@ export function generateSchemaFromEnvFiles(
 	// Separate server and client variables
 	const serverVars: string[] = [];
 	const clientVars: string[] = [];
-	const sharedVars: string[] = [];
 
 	// First pass: categorize variables
 	Object.keys(variables).forEach((key) => {

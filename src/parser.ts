@@ -46,7 +46,7 @@ export function parse(
 	const result: Record<string, string> = {};
 	const lines = content.split(/\r?\n/);
 
-	for (let line of lines) {
+	for (const line of lines) {
 		// Skip comments and empty lines
 		if (line.trim().startsWith("#") || !line.trim()) {
 			continue;

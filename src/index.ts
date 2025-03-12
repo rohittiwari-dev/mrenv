@@ -44,7 +44,6 @@ export function createEnv<T extends EnvSafeSchema = EnvSafeSchema>(
 		adapter = "node",
 		updateProcessEnv = true,
 		logLevel = "error",
-		schema,
 	} = config;
 
 	// Initialize the environment store
@@ -146,7 +145,7 @@ function createProxy<T>(
 export function loadEnvFile(options: LoadOptions = {}): Record<string, string> {
 	const {
 		directory = process.cwd(),
-		fileName = ".env",
+		fileName: _fileName = ".env",
 		environment = process.env.NODE_ENV || "development",
 		encoding = "utf8",
 		expandVariables = true,
@@ -191,8 +190,8 @@ export function loadEnvFile(options: LoadOptions = {}): Record<string, string> {
  */
 function defaultValidationErrorHandler(
 	error: ZodError,
-	env: Record<string, any>,
-	schema: z.ZodType,
+	_env: Record<string, any>,
+	_schema: z.ZodType,
 ): never {
 	const formattedErrors = error.errors
 		.map((err) => {
@@ -264,9 +263,9 @@ export {
  * ```
  */
 export function createTypedEnv<
-	TServer extends Record<string, ZodType> = {},
-	TClient extends Record<string, ZodType> = {},
-	TShared extends Record<string, ZodType> = {},
+	TServer extends Record<string, ZodType> = Record<string, never>,
+	TClient extends Record<string, ZodType> = Record<string, never>,
+	TShared extends Record<string, ZodType> = Record<string, never>,
 >(config: {
 	server?: TServer;
 	client?: TClient;

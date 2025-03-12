@@ -12,8 +12,7 @@ import {
 	generateSchemaFromEnvFiles,
 	createEnvFileFromSchema,
 } from "./schema-utils";
-import { parse, stringify } from "./parser";
-import { z } from "zod";
+import { parse } from "./parser";
 
 // Initialize CLI
 const program = new Command();
@@ -45,7 +44,7 @@ program
 	.action((options) => {
 		try {
 			console.log(chalk.blue("Generating schema from .env files..."));
-			const { zodSchema } = generateSchemaFromEnvFiles({
+			const { zodSchema: _zodSchema } = generateSchemaFromEnvFiles({
 				directory: options.directory,
 				environment: options.env,
 				output: options.output,
@@ -137,7 +136,7 @@ program
 					throw new Error(`Schema file not found: ${options.schema}`);
 				}
 
-				const fileContent = fs.readFileSync(schemaPath, "utf-8");
+				const _fileContent = fs.readFileSync(schemaPath, "utf-8");
 				console.error(
 					chalk.yellow(
 						`Schema file found but could not be imported. Please check your schema file.`,
@@ -252,13 +251,14 @@ program
 					console.log(
 						chalk.blue("Generating schema from .env files..."),
 					);
-					const { zodSchema } = generateSchemaFromEnvFiles({
-						directory: answers.directory,
-						environment: answers.environment,
-						output: answers.output,
-						type: "zod",
-						includeComments: true,
-					});
+					const { zodSchema: _zodSchema } =
+						generateSchemaFromEnvFiles({
+							directory: answers.directory,
+							environment: answers.environment,
+							output: answers.output,
+							type: "zod",
+							includeComments: true,
+						});
 
 					console.log(
 						chalk.green(
