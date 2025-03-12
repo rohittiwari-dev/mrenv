@@ -28,6 +28,11 @@ export default defineConfig([
 		define: {
 			"process.env.PACKAGE_VERSION": JSON.stringify(packageVersion),
 		},
+		esbuildOptions(options) {
+			options.platform = "neutral";
+			options.target = ["es2020"];
+		},
+		bundle: true,
 	},
 	// CLI build - CommonJS only with proper Node.js compatibility
 	{
@@ -48,5 +53,10 @@ export default defineConfig([
 		banner: {
 			js: "#!/usr/bin/env node\nrequire('source-map-support').install();",
 		},
+		esbuildOptions(options) {
+			options.platform = "node";
+			options.target = ["node16"];
+		},
+		bundle: true,
 	},
 ]);

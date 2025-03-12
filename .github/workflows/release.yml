@@ -19,7 +19,15 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version: 20
-            - run: npm i
+            # Use clean installation to avoid optional dependency issues
+            - name: Clean installation
+              run: |
+                  rm -rf node_modules package-lock.json
+                  npm install --no-optional
+            - name: Build package
+              run: |
+                  export ROLLUP_SKIP_OPTIONAL=true
+                  npm run build
 
     publish-npm:
         needs: build
@@ -30,7 +38,16 @@ jobs:
               with:
                   node-version: 20
                   registry-url: https://registry.npmjs.org/
-            - run: npm i
-            - run: npm publish
+            # Use clean installation to avoid optional dependency issues
+            - name: Clean installation
+              run: |
+                  rm -rf node_modules package-lock.json
+                  npm install --no-optional
+            - name: Build package
+              run: |
+                  export ROLLUP_SKIP_OPTIONAL=true
+                  npm run build
+            - name: Publish package
+              run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.npm_token}}
