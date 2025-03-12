@@ -1,79 +1,158 @@
-import { type NextConfig } from "next";
-import { CreateEnvConfig } from "../core/types";
-import { createEnv } from "../core/createEnv";
-
 /**
- * Next.js adapter configuration
+ * Next.js Adapter
+ *
+ * Specialized adapter for Next.js applications with client/server awareness.
  */
-export interface WithSuperenvOptions extends CreateEnvConfig {
+
+import { type EnvironmentAdapter } from "./";
+
+interface NextAdapterOptions {
 	/**
-	 * Whether to expose environment variables in browser
-	 * @default false
+	 * Prefix for client-exposed variables (default: NEXT_PUBLIC_)
 	 */
-	exposeToClient?: boolean;
+	publicPrefix?: string;
+
+	/**
+	 * Whether to validate prefix conventions
+	 */
+	strictPrefix?: boolean;
+
+	/**
+	 * Function to determine if a variable is client-safe
+	 */
+	isClientSafe?: (key: string, value: string) => boolean;
 }
 
 /**
- * Next.js adapter for superenv
- * @param nextConfig Next.js configuration
- * @param options Superenv options
- * @returns Modified Next.js configuration
+ * Extended Next.js adapter with additional features
  */
-export function withSuperenv(
-	nextConfig: NextConfig = {},
-	options: WithSuperenvOptions = {},
-) {
-	// Initialize environment
-	const env = createEnv(options);
-
-	// Filter environment for client
-	const publicEnvKeys = Object.keys(env).filter((key) => {
-		// Skip internal metadata
-		if (key === "_metadata") return false;
-
-		// If publicPrefix is specified, check for prefix
-		if (options.publicPrefix) {
-			return key.startsWith(options.publicPrefix);
-		}
-
-		// If protected list is specified, exclude those
-		if (options.protectedEnv) {
-			return !options.protectedEnv.includes(key);
-		}
-
-		// If exposeToClient is explicitly set to false, don't expose anything
-		if (options.exposeToClient === false) {
-			return false;
-		}
-
-		// Default: expose all if no filtering is configured
-		return true;
-	});
-
-	// Create public env object
-	const publicEnv = publicEnvKeys.reduce((acc, key) => {
-		acc[key] = env[key];
-		return acc;
-	}, {} as Record<string, any>);
-
-	return {
-		...nextConfig,
-		// Merge with existing env
-		env: {
-			...(nextConfig.env || {}),
-			...publicEnv,
-		},
-		// Optional: add server runtime config
-		serverRuntimeConfig: {
-			...(nextConfig.serverRuntimeConfig || {}),
-			// Full env available on server
-			_superenv: env,
-		},
-		// Optional: add public runtime config
-		publicRuntimeConfig: {
-			...(nextConfig.publicRuntimeConfig || {}),
-			// Public env for client
-			_superenv: publicEnv,
-		},
+export class NextjsAdapter implements EnvironmentAdapter {
+	private options: NextAdapterOptions = {
+		publicPrefix: "NEXT_PUBLIC_",
+		strictPrefix: true,
 	};
+
+	/**
+	 * Initialize the adapter with options
+	 */
+	init(options?: NextAdapterOptions): void {
+		this.options = {
+			...this.options,
+			...options,
+		};
+	}
+
+	/**
+	 * Check if running in a server environment
+	 */
+	isServer(): boolean {
+		return typeof window === "undefined";
+	}
+
+	/**
+	 * Get environment variables based on current environment
+	 */
+	getEnvironment(): Record<string, string> {
+		if (this.isServer()) {
+			return process.env as Record<string, string>;
+		}
+
+		// In browser, only return client-safe variables
+		return this.getClientEnv();
+	}
+
+	/**
+	 * Get all environment variables
+	 */
+	getAllEnv(): Record<string, string> {
+		return process.env as Record<string, string>;
+	}
+
+	/**
+	 * Get only client-safe environment variables
+	 */
+	getClientEnv(): Record<string, string> {
+		const env: Record<string, string> = {};
+		const { publicPrefix, isClientSafe } = this.options;
+
+		Object.entries(process.env as Record<string, string>).forEach(
+			([key, value]) => {
+				const isPublic = key.startsWith(publicPrefix ?? "");
+
+				// Check if variable is client-safe
+				if (isPublic || (isClientSafe && isClientSafe(key, value))) {
+					env[key] = value;
+				}
+			},
+		);
+
+		return env;
+	}
+
+	/**
+	 * Check if a variable is client-safe
+	 */
+	isPublicVariable(key: string): boolean {
+		const { publicPrefix, isClientSafe } = this.options;
+
+		if (key.startsWith(publicPrefix ?? "")) {
+			return true;
+		}
+
+		if (isClientSafe && isClientSafe(key, process.env[key] || "")) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get build-time variables for Next.js
+	 */
+	getBuildEnv(): Record<string, string> {
+		// These variables are available at build time in Next.js
+		const env: Record<string, string> = {};
+
+		Object.entries(process.env as Record<string, string>).forEach(
+			([key, value]) => {
+				if (this.isPublicVariable(key)) {
+					env[key] = value;
+				}
+			},
+		);
+
+		return env;
+	}
+
+	/**
+	 * Validate that client-safe variables follow the prefix convention
+	 */
+	validatePrefixConventions(
+		env: Record<string, any>,
+		clientKeys: string[],
+	): string[] {
+		if (!this.options.strictPrefix) {
+			return [];
+		}
+
+		const { publicPrefix } = this.options;
+		const errors: string[] = [];
+
+		// Check that client variables follow the prefix convention
+		clientKeys.forEach((key) => {
+			if (!key.startsWith(publicPrefix ?? "")) {
+				errors.push(
+					`Client variable "${key}" does not follow the ${publicPrefix} prefix convention. ` +
+						`Either prefix it with ${publicPrefix} or mark it as server-only.`,
+				);
+			}
+		});
+
+		return errors;
+	}
 }
+
+// Export a singleton instance
+export const nextAdapter = new NextjsAdapter();
+
+export default nextAdapter;
